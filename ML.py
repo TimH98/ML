@@ -95,10 +95,10 @@ class PolynomialLinReg:
         """
         Fit training data
         X : Training vectors, X.shape : [#samples]
-        y : Target values, y.chape: [#samples]
+        y : Target values, y.shape: [#samples]
         dim: order of the polynomial (1=linear, 2=quadratic, etc)"""
         ones = np.ones(np.size(X))
-        Xmat = np.stack((ones, X))
+        Xmat = np.vstack((ones, X))
 
         for i in range(2, dim+1):
             Xmat = np.vstack((Xmat, X**i))

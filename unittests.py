@@ -53,6 +53,14 @@ class Test_ML(TestCase):
         lr.plotData(X, y)
         plt.show()
 
+    def test_PolynomialLinReg(self):
+        plr = PolynomialLinReg()
+
+        # Test with simple data: y = 3 + 2x + x^2
+        X = np.array([0, 1, 2, 3, 4])
+        y = np.array([3, 6, 11, 18, 27])
+        plr.fit(X, y, 2)
+        self.assertTrue(np.allclose(plr.weight, [3, 2, 1]))
 
     def test_DecisionStumps(self):
         ds = DecisionStump()
