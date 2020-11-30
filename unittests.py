@@ -31,6 +31,17 @@ class Test_ML(TestCase):
         plt.ylabel("petal length [cm]")
         plt.show()
 
+    def test_SoftSVM(self):
+        svm = SoftSVM()
+        df = pd.read_csv('https://archive.ics.uci.edu/ml/machine-learning-'
+                         'databases/iris/iris.data', header=None)
+
+        X = df.iloc[0:100, [0, 2]].values
+        y = df.iloc[0:100, 4].values
+        y = np.where(y == 'Iris-setosa', -1, 1)
+        svm.fit(X, y, 10, 0.5)
+        print(svm.weight)
+
     def test_LinearRegression(self):
         lr = LinearRegression()
 
@@ -61,6 +72,16 @@ class Test_ML(TestCase):
         y = np.array([3, 6, 11, 18, 27])
         plr.fit(X, y, 2)
         self.assertTrue(np.allclose(plr.weight, [3, 2, 1]))
+
+    def test_Threshold(self):
+        thres = Threshold()
+
+        # Test with simple data: y=0 if x<2.05, y=1 if x>2.05
+        x = np.array([0, 1, 2, 2.1, 3, 4])
+        y = np.array([0, 0, 0, 1, 1, 1])
+        resp = thres.ERM(x, y)
+        self.assertEqual(resp, 2.05)
+
 
     def test_DecisionStumps(self):
         ds = DecisionStump()

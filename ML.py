@@ -1,3 +1,5 @@
+from random import randint
+
 import numpy as np
 from matplotlib.colors import ListedColormap
 from matplotlib import pyplot as plt
@@ -11,7 +13,7 @@ class Perceptron:
     def fit(self, X, y):
         """ Fit training data
         X : Training vectors, X.shape : [#samples, #features]
-        y : Target values, y.chape: [#samples]"""
+        y : Target values, y.shape: [#samples]"""
 
         # weights: create a weights array of right size
         # and initialize elements to zero (note: self.weight[0] is the bias)
@@ -60,6 +62,24 @@ class Perceptron:
         return np.where(self.net_input(X) >= 0, 1, -1)
 
 
+class SoftSVM:
+    def __init__(self):
+        self.weight = None
+
+    def fit(self, X, y, T, L):
+        # note m = size of y, L = lambda
+        theta = np.zeros((T+1, X.shape[1]))
+        w = np.zeros((T, X.shape[1]))
+        for t in range(T):
+            w[t] = theta[t] / L
+            i = randint(0, y.size)
+            if y[i] * np.dot(w[t], X[i]) < 1:
+                theta[t+1] = theta[t] + X[i]*y[i]
+            else:
+                theta[t+1] = theta[t]
+        self.weight = np.sum(w, axis=0) / T
+
+
 class LinearRegression:
     def __init__(self):
         self.weight = None
@@ -68,7 +88,7 @@ class LinearRegression:
         """
         Fit training data using Least Squares
         X : Training vectors, X.shape : [#samples]
-        y : Target values, y.chape: [#samples]"""
+        y : Target values, y.shape: [#samples]"""
         ones = np.ones(np.shape(X)[0])
         Xw = np.c_[ones, X]
 
@@ -108,13 +128,40 @@ class PolynomialLinReg:
         self.weight = np.matmul(mat1, mat2)
 
 
+class Threshold:
+    def ERM(self, x, y):
+        """
+        Performs ERM for threshold functions. Returns a such that
+        when x<a, y=0; when x>=a, y=1
+        x : Training vector, x.shape : [#samples]
+        y : Target values, y.shape: [#samples]
+        """
+        # Get sorted list of points
+        # Note: points[i][0] = the i'th X value, points[i][1] = the i'th Y value
+        points = [(x[i], y[i]) for i in range(len(y))]
+        comp = lambda p: p[0]
+        points = sorted(points, key=comp)
+
+        # If the first point is 1, the threshold is before the first point
+        if points[0][1] == 1:
+            return points[0][0] - 1
+
+        # Find first point with y=1, put threshold between that and previous point
+        for i in range(len(points)):
+            if points[i][1] > 0:
+                return (points[i-1][0] + points[i][0]) / 2
+
+        # If the last point is 0, the threshold is after the last point
+        return points[-1][0] + 1
+
+
 class DecisionStump:
     def ERM(self, X, y, D):
         """
         Performs ERM for decision stumps. Returns the dimension to check and
         the value to check against
         X : Training vectors, X.shape : [#dimensions, #samples]
-        y : Target values, y.chape: [#samples]
+        y : Target values, y.shape: [#samples]
         D : Distribution vector (how likely each X value is to appear), D.shape: [#samples]
         """
         # Get list of points and initialize loop variables
