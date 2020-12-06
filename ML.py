@@ -62,22 +62,34 @@ class Perceptron:
         return np.where(self.net_input(X) >= 0, 1, -1)
 
 
-class SoftSVM:
-    def __init__(self):
+class StochasticSoftSVM:
+    def __init__(self, _lambda, niter):
         self.weight = None
+        self.L = _lambda
+        self.niter = niter
 
-    def fit(self, X, y, T, L):
+    def fit(self, X, y):
         # note m = size of y, L = lambda
-        theta = np.zeros((T+1, X.shape[1]))
-        w = np.zeros((T, X.shape[1]))
-        for t in range(T):
-            w[t] = theta[t] / L
-            i = randint(0, y.size)
-            if y[i] * np.dot(w[t], X[i]) < 1:
-                theta[t+1] = theta[t] + X[i]*y[i]
+        ones = np.ones(np.shape(X)[0])
+        Xw = np.c_[ones, X]
+        theta = np.zeros((self.niter+1, Xw.shape[1]))
+        w = np.zeros((self.niter, Xw.shape[1]))
+        for t in range(self.niter):
+            w[t] = theta[t] / self.L
+            i = randint(0, y.size-1)
+            if y[i] * np.dot(w[t], Xw[i]) < 1:
+                theta[t+1] = theta[t] + Xw[i]*y[i]
             else:
                 theta[t+1] = theta[t]
-        self.weight = np.sum(w, axis=0) / T
+        self.weight = np.sum(w, axis=0) / self.niter
+
+    def net_input(self, X):
+        """Calculate net input"""
+        return np.dot(X, self.weight[1:]) + self.weight[0]
+
+    def predict(self, X):
+        """Return class label after unit step"""
+        return np.where(self.net_input(X) >= 0, 1, -1)
 
 
 class LinearRegression:
@@ -198,7 +210,34 @@ class DecisionStump:
         return j_min, theta
 
 
+class NearestNeighbor:
+    def __init__(self, X, norm=2):
+        self.points = X
+        self.norm = norm
+
+    def dist(self, pt1, pt2):
+        """ Get the distance between two points in n-dimensional space in the correct norm """
+        dist = 0
+        for i in range(len(pt1)):
+            dist += pow(abs(pt1[i] - pt2[i]), self.norm)
+        return pow(dist, 1/self.norm)
+
+    def nearest(self, x):
+        """ Find the point nearest to x """
+        bestPt = self.points[0]
+        bestDist = self.dist(x, self.points[0])
+
+        for i in range(1, len(self.points)):
+            dist = self.dist(x, self.points[i])
+            if dist < bestDist:
+                bestDist = dist
+                bestPt = self.points[i]
+
+        return bestPt
+
+
 def plot_decision_regions(X, y, classifier, resolution=0.02):
+    """ Display decision boundary for Perceptron or SVM """
     # setup marker generator and color map
     markers = ('s', 'x', 'o', '^', 'v')
     colors = ('red', 'blue', 'lightgreen', 'gray', 'cyan')
@@ -220,3 +259,8 @@ def plot_decision_regions(X, y, classifier, resolution=0.02):
         plt.scatter(x=X[y == c1, 0], y=X[y == c1, 1],
                     alpha=0.8, c=cmap(idx),
                     marker=markers[idx], label=c1)
+
+
+def scatter_plot(X):
+    """ Visualize data in 2 dimensions """
+    plt.scatter(x=X[:, 0], y=X[:, 1])
