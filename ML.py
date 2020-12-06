@@ -11,9 +11,11 @@ class Perceptron:
         self.niter = niter
 
     def fit(self, X, y):
-        """ Fit training data
+        """
+        Fit training data
         X : Training vectors, X.shape : [#samples, #features]
-        y : Target values, y.shape: [#samples]"""
+        y : Target values, y.shape: [#samples]
+        """
 
         # weights: create a weights array of right size
         # and initialize elements to zero (note: self.weight[0] is the bias)
@@ -69,7 +71,11 @@ class StochasticSoftSVM:
         self.niter = niter
 
     def fit(self, X, y):
-        # note m = size of y, L = lambda
+        """
+        Fit training data
+        X : Training vectors, X.shape : [#samples, #features]
+        y : Target values, y.shape: [#samples]
+        """
         ones = np.ones(np.shape(X)[0])
         Xw = np.c_[ones, X]
         theta = np.zeros((self.niter+1, Xw.shape[1]))
@@ -100,7 +106,8 @@ class LinearRegression:
         """
         Fit training data using Least Squares
         X : Training vectors, X.shape : [#samples]
-        y : Target values, y.shape: [#samples]"""
+        y : Target values, y.shape: [#samples]
+        """
         ones = np.ones(np.shape(X)[0])
         Xw = np.c_[ones, X]
 
@@ -123,17 +130,18 @@ class PolynomialLinReg:
     def __init__(self):
         self.weight = None
 
-    def fit(self, X, y, dim):
+    def fit(self, x, y, dim):
         """
         Fit training data
-        X : Training vectors, X.shape : [#samples]
+        x : Training vector, x.shape : [#samples]
         y : Target values, y.shape: [#samples]
-        dim: order of the polynomial (1=linear, 2=quadratic, etc)"""
-        ones = np.ones(np.size(X))
-        Xmat = np.vstack((ones, X))
+        dim: order of the polynomial (1=linear, 2=quadratic, etc)
+        """
+        ones = np.ones(np.size(x))
+        Xmat = np.vstack((ones, x))
 
         for i in range(2, dim+1):
-            Xmat = np.vstack((Xmat, X**i))
+            Xmat = np.vstack((Xmat, x**i))
 
         mat1 = np.linalg.inv(np.matmul(Xmat, Xmat.T))
         mat2 = np.matmul(Xmat, y.T)
@@ -215,7 +223,7 @@ class NearestNeighbor:
         self.points = X
         self.norm = norm
 
-    def dist(self, pt1, pt2):
+    def _dist(self, pt1, pt2):
         """ Get the distance between two points in n-dimensional space in the correct norm """
         dist = 0
         for i in range(len(pt1)):
@@ -225,10 +233,10 @@ class NearestNeighbor:
     def nearest(self, x):
         """ Find the point nearest to x """
         bestPt = self.points[0]
-        bestDist = self.dist(x, self.points[0])
+        bestDist = self._dist(x, self.points[0])
 
         for i in range(1, len(self.points)):
-            dist = self.dist(x, self.points[i])
+            dist = self._dist(x, self.points[i])
             if dist < bestDist:
                 bestDist = dist
                 bestPt = self.points[i]
